@@ -300,6 +300,15 @@
                                     <bool key="isElement" value="YES"/>
                                 </accessibility>
                             </view>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TaL-ee-eYV">
+                                <rect key="frame" x="149" y="177" width="117" height="41"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Refresh"/>
+                                <connections>
+                                    <action selector="connectTest:" destination="BYZ-38-t0r" eventType="touchUpInside" id="xBv-93-aXV"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -310,11 +319,13 @@
                         <outlet property="AutoManualRPM" destination="l4W-Bz-Wdc" id="THX-U5-yrM"/>
                         <outlet property="AutoManualTempFrom" destination="kdx-0s-cfW" id="zyS-3G-nXy"/>
                         <outlet property="AutoManualTempTo" destination="G3Q-XN-KPw" id="bGe-Y6-jFR"/>
+                        <outlet property="RPMLabel" destination="ayS-Nv-TKE" id="4O0-wq-aZp"/>
                         <outlet property="autoDefaultView" destination="eUp-JR-jbx" id="RI9-qw-KR7"/>
                         <outlet property="autoManualView" destination="GYP-83-wH9" id="Eky-7R-l2a"/>
                         <outlet property="manualLevel" destination="Bb4-eh-N0d" id="PkM-e9-9gf"/>
                         <outlet property="manualView" destination="lEJ-bx-jZf" id="ibN-NG-8tU"/>
                         <outlet property="segControl" destination="9fb-px-FaV" id="fZz-1V-6w3"/>
+                        <outlet property="temperatureLabel" destination="dBO-E6-N2P" id="xYq-ph-pLx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

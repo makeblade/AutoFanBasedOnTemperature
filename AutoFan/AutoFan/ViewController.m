@@ -16,12 +16,16 @@
 @synthesize AutoManualTempFrom;
 @synthesize AutoManualRPM;
 @synthesize AutoManualList;
+@synthesize temperatureLabel;
+@synthesize RPMLabel;
+@synthesize timer;
 
 - (void) manualLevelUpdate:(int)level {
     self.manualLevel.subviews[current_level].backgroundColor = UIColor.systemGray3Color;
     self.manualLevel.subviews[level].backgroundColor = UIColor.systemRedColor;
     current_level = level;
     list_size = 0;
+    timer = [NSTimer scheduledTimerWithTimeInterval: 1 target:self selector:@selector(updateTempRPM:) userInfo:nil repeats: YES];
 }
 
 - (void)viewDidLoad {
@@ -109,6 +113,76 @@
     [alert addAction:defaultAction];
     [self presentViewController:alert animated:YES completion:nil];
 }
+
+- (IBAction)connectTest:(id)sender {
+    NSLog(@"Sending data...");
+    
+    NSString* str = @"teststring";
+    NSData* data = [str dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSString* result = [self sendDataTo:@"http://192.168.1.24" withBody:data];
+    
+    NSLog(@"%@", result);
+}
+
+- (void)updateTempRPM:(NSTimer*)theTimer{
+    NSLog(@"Retrieving data...");
+    NSArray* content = [[self getDataFrom:@"http://192.168.1.24"] componentsSeparatedByString: @"\n"];
+        
+    temperatureLabel.text = [NSString stringWithFormat:@" %@ °F / %@ °C", [self formatResponse:content[2]], [self formatResponse:content[3]]];
+    RPMLabel.text = [NSString stringWithFormat:@" %@", content[4]];
+}
+
+- (NSString *) getDataFrom:(NSString *)url{
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setHTTPMethod:@"GET"];
+    [request setURL:[NSURL URLWithString:url]];
+
+    NSError *error = nil;
+    NSHTTPURLResponse *responseCode = nil;
+
+    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+
+    if([responseCode statusCode] != 200){
+        NSLog(@"Error getting %@, HTTP status code %i", url, (int)[responseCode statusCode]);
+        return nil;
+    }
+
+    return [[NSString alloc] initWithData:oResponseData encoding:NSUTF8StringEncoding];
+}
+
+- (NSString *) sendDataTo:(NSString *)url withBody:(NSData *)body {
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPBody:body];
+    [request setValue:[NSString stringWithFormat:@"%lu", [body length]] forHTTPHeaderField:@"Content-Length"];
+    [request setURL:[NSURL URLWithString:url]];
+    
+    NSError *error = nil;
+    NSHTTPURLResponse *responseCode = nil;
+
+    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+
+    if([responseCode statusCode] != 200){
+        NSLog(@"Error getting %@, HTTP status code %i", url, (int)[responseCode statusCode]);
+        return nil;
+    }
+
+    return [[NSString alloc] initWithData:oResponseData encoding:NSUTF8StringEncoding];
+}
+
+- (NSString *) formatResponse:(NSString *)response {
+    if ([response length] > 0) {
+        response = [response substringToIndex:[response length] - 1];
+    } else {
+        //no characters to delete... attempting to do so will result in a crash
+    }
+    
+    return response;
+
+}
+
+
 
 
 @end
