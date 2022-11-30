@@ -111,10 +111,13 @@ void setup()
 void loop()
 {
   // listen for incoming clients
+  int header_length = 0;
+  char firstLine[500];
   WiFiClient client = server.available();
   if (client)
   {
-    Serial.println(F("New client"));
+    header_length = 0;
+    //Serial.println(F("New client"));
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     
@@ -123,7 +126,8 @@ void loop()
       if (client.available()) 
       {
         char c = client.read();
-        Serial.write(c);
+        firstLine[header_length] = c;
+        header_length ++;
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
@@ -134,33 +138,8 @@ void loop()
         }
         if (c == '\n' && currentLineIsBlank) 
         {
-          // send a standard http response header
-          client.println("HTTP/1.1 200 OK");
-          client.println("Content-Type: text/html");
-          client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 1");  // refresh the page automatically every 5 sec
-          client.println();
-          client.println("<!DOCTYPE HTML>");
-          client.println("<html>");
-          
-          // output the value of each analog input pin
-          // for (int analogChannel = 0; analogChannel < 6; analogChannel++) 
-          // {
-          //   int sensorReading = analogRead(analogChannel);
-          //   client.print("analog input ");
-          //   client.print(analogChannel);
-          //   client.print(" is ");
-          //   client.print(sensorReading);
-          //   client.println("<br />");
-          // }
-          client.println(20);
-          client.println(30);
-          client.println(3000);
-          
-          client.println("</html>");
           break;
         }
-        
         if (c == '\n') 
         {
           // you're starting a new line
@@ -177,8 +156,15 @@ void loop()
     delay(1);
 
     // close the connection:
+    int type = getPackageType(firstLine);
+    if (type == 0)
+      response(client);
+    else if (type == 6)
+      Serial.println("Auto mode");
+    else 
+      Serial.println(type);
     client.stop();
-    Serial.println(F("Client disconnected"));
+    //Serial.println(F("Client disconnected"));
   }
 }
 
@@ -198,4 +184,39 @@ void printWiFiStatus()
   Serial.print(F("Signal strength (RSSI):"));
   Serial.print(rssi);
   Serial.println(F(" dBm"));
+}
+
+void response(WiFiClient client) {
+  // send a standard http response header
+  client.println("HTTP/1.1 200 OK");
+  client.println("Content-Type: text/html");
+  client.println("Connection: close");  // the connection will be closed after completion of the response
+  client.println("Refresh: 1");  // refresh the page automatically every 5 sec
+  client.println();
+  client.println("<!DOCTYPE HTML>");
+  client.println("<html>");
+  
+  // output the value of each analog input pin
+  // for (int analogChannel = 0; analogChannel < 6; analogChannel++) 
+  // {
+  //   int sensorReading = analogRead(analogChannel);
+  //   client.print("analog input ");
+  //   client.print(analogChannel);
+  //   client.print(" is ");
+  //   client.print(sensorReading);
+  //   client.println("<br />");
+  // }
+  client.println(20);
+  client.println(30);
+  client.println(3000);
+  
+  client.println("</html>");
+}
+
+int getPackageType(char content[500]) {
+  if (content[0] == 'G')
+    return 0;
+  else if (content[0] == 'P')
+    return content[1] - '0';
+  return -1;
 }
